@@ -18,9 +18,15 @@ STL六大组件
 5、配接器（适配器）（Adapters）：一种用来修饰容器（Containers）或仿函数（Functors）或迭代器（Iterators）接口的东西，例如：STL提供的Queue和Stack，虽然看似容器，其实只能算是一种容器配接器，因为 它们的底部完全借助Deque，所有操作有底层的Deque供应。改变Functor接口者，称为Function Adapter;改变Container接口者，称为Container Adapter;改变Iterator接口者，称为Iterator Adapter。配接器的实现技术很难一言蔽之，必须逐一分析。
 
 6、分配器（Allocators）：负责空间配置与管理，从实现的角度来看，配置器是一个实现了动态空间配置、空间管理、空间释放的Class Template。
-                                                                                                                                                                                                                                                            ——《STL源码剖析》
+
+                                                                                                 ——《STL源码剖析》
 
 
+
+
+
+
+代码实现部分：
 
 1. 分配器 （Allocators)
 
@@ -31,7 +37,17 @@ allocator 负责内存空间的配置与回收，定义了一个MySTL:allocator�
 constructor 负责对象的构造与析构。
 
 
-alloc.h       //实现STL的二级空间配置.
+<alloc.h>       //实现STL的二级空间配置.
 
 在C++中，通常使用new和delete来实现空间的配置（注：这里的空间不仅仅是指内存空间，还包括磁盘或者其他存储介质），类似于C中的malloc和free.
+
+mystl::alloc的实现原理：
+
+1）设置一个空间大小阈值，通常设置为128bytes。
+
+2）若申请的空间大小大于128bytes，则调用一级空间配置器。
+
+3）若申请的空间大小小于128bytes，则调用二级空间配置器。
+
+
 
