@@ -112,5 +112,17 @@ namespace mystl    //命名空间: 建立一些互相分隔的作用域，把一
         }
     }
 
+    /*在调用allocate时，若没有空闲空间，则掉用refill来进行free-lists的更新，
+    新的空间取自内存池，经由chunk_alloc() 完成。
+    缺省取得20个新区块
+    当内存池空间不足时，获得的新区快的数量可能低于20.
+    */
+    void* _alloc_mystl::refill(size_t n)
+    {
+        int nfreelists = 20;
+        
+
+    }
+
 }
 #endif
