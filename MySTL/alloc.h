@@ -54,6 +54,7 @@ namespace mystl    //命名空间: 建立一些互相分隔的作用域，把一
 
         //重新填充 free_lists  !!!待更新
         static void* refill(size_t n);
+        static char* chunk_alloc(size_t n, int& nfreelist_links);
 
 
         //基本的 allocate 以及 deallocate 函数
@@ -112,15 +113,35 @@ namespace mystl    //命名空间: 建立一些互相分隔的作用域，把一
         }
     }
 
-    /*在调用allocate时，若没有空闲空间，则掉用refill来进行free-lists的更新，
-    新的空间取自内存池，经由chunk_alloc() 完成。
+    /*
+    在调用allocate时，若没有空闲空间，则掉用refill来进行free-lists的更新，并返回一个大小为n的区块
+    新的区块空间取自内存池，经由 chunk_alloc() 完成。
     缺省取得20个新区块
     当内存池空间不足时，获得的新区快的数量可能低于20.
     */
     void* _alloc_mystl::refill(size_t n)
     {
-        int nfreelists = 20;
+        int nfreelist_links = 20;  //该数值会根据当前内存池可供应区块的能力进行调整（会减小）
+                                   //在后面通过 引用 的方式 更改值 (pass by reference)
         
+        //nfreelist_links change by chunk_alloc(size_t n, int &nfreelist_links)]
+        char* chunk = chunk_alloc(n, nfreelist_links);
+
+        freeList* volatile *my_free_list;
+
+        if(nfreelist_links == 1)    //只能申请到一个符合条件的区块,即chunk
+        {
+            return chunk;
+        }
+        else      //返回多个区块，将其放入到 free-lists 中
+        {
+            my_free_list = free_lists + FREELISTS_INDEX(n);
+        }
+
+
+
+        
+
 
     }
 
