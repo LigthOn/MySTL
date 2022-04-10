@@ -38,7 +38,7 @@ namespace mystl    //命名空间: 建立一些互相分隔的作用域，把一
         private:
         //征对不同size的区块，定义16个freeLists
         //添加了 volatile 参数，表示该列表通常改变。
-        static freeList* volatile free_lists[_FREELISTS_NUM];
+        static freeList * volatile free_lists[_FREELISTS_NUM];
 
         //ROUND UP 上调区块需求，满足8的倍数，使用静态可以减少实例化时额外的开销
         static size_t ROUND_UP(size_t bytes)
@@ -53,14 +53,64 @@ namespace mystl    //命名空间: 建立一些互相分隔的作用域，把一
         }
 
         //重新填充 free_lists  !!!待更新
-        static void* refill();
+        static void* refill(size_t n);
 
 
         //基本的 allocate 以及 deallocate 函数
         public:
         static void* allocate(size_t n);
-        static void* deallocate(void* p, size_t n);
+        static void deallocate(void* p, size_t n);
     };
+
+
+    //分配需求为 n
+    void* _alloc_mystl::allocate(size_t n)
+    {
+        freeList* volatile * my_free_list; //指向一个 freeList 指针对象的的指针
+        freeList* volatile result;
+
+        //如果大于 128bytes，则直接掉用 malloc
+        if( n > _MAX_BYTES)
+        {
+            return std::malloc(n);
+        }
+        
+        //找到最适合的 free-list
+        my_free_list = free_lists  + FREELISTS_INDEX(n);
+        //my_free_list = free_lists[ FREELISTS_INDEX(n) ];
+        result = *my_free_list;
+        if(result == 0)  //若没有空闲空间了，则掉用 refill 重新填充 free-list.
+        {
+            void* r = refill(ROUND_UP(n));
+            return r;
+        }
+        else //找到合适的区块用于分配
+        {
+            *my_free_list = result->next;  //调整free_lists.
+            return result;
+        }
+    }
+
+
+    void _alloc_mystl::deallocate(void *p, size_t n)
+    {
+        freeList* volatile *my_free_list;
+        freeList* q = reinterpret_cast<freeList*>(p);
+
+        my_free_list = free_lists + FREELISTS_INDEX(n);
+
+        //n大于 128 bytes，则调用一级 free;
+        if(n > _MAX_BYTES)
+        {
+            std::free(p);
+        }
+        else
+        {
+            my_free_list = free_lists + FREELISTS_INDEX(n);
+            q->next = *my_free_list;
+            *my_free_list = q;
+        }
+    }
 
 }
 #endif
