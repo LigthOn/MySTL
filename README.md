@@ -29,11 +29,13 @@ STL六大组件
 
 1. 分配器 （Allocators)
 
-包括 allocator 和 constructor，
+包括 constructor（construct.h) 和 allocator(alloc.h).
+
+constructor 负责对象的构造与析构。
 
 allocator 负责内存空间的配置与回收，定义了一个MySTL:allocator类，并使用内存池实现。
 
-constructor 负责对象的构造与析构。
+
 
 
 <alloc.h>       //实现STL的二级空间配置.
@@ -47,6 +49,8 @@ mystl::alloc的实现原理：
 2）若申请的空间大小大于128bytes，则调用一级空间配置器。
 
 3）若申请的空间大小小于128bytes，则调用二级空间配置器。
+
+<construct.h>  //定义全局的contruct()和destory()函数，用于对象的构建和析构。
 
 
 
