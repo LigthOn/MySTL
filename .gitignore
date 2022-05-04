@@ -2,6 +2,7 @@
 *.d
 notes
 build/
+.vscode/
 
 # Compiled Object files
 *.slo
